@@ -1,38 +1,54 @@
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Border, Alignment, Side
+from openpyxl.styles import Font, PatternFill, Border, Alignment
 
 class ExcelFormatter:
-    def formatCellAll(ws, cellRange, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
+    def formatCellRange(ws, cellRange, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
+        # Formats all cells in a range with the same formatting
         for row in ws[cellRange]:
             for cell in row:
                 cell.font = ft
                 cell.fill = fl
                 cell.border = bd
                 cell.alignment = al
-                            
-    def formatCellFont(ws, cellRange, ft=Font()):
-        for row in ws[cellRange]:
-            for cell in row:
-                cell.font = ft
-    
-    def formatCellFill(ws, cellRange, fl=PatternFill()):
-        for row in ws[cellRange]:
-            for cell in row:
-                cell.fill = fl
-    
-    def formatCellBorder(ws, cellRange, bd=Border()):
-        for row in ws[cellRange]:
-            for cell in row:
-                cell.border = bd
-                
-    def formatCellAlign(ws, cellRange, al=Alignment()):
-        for row in ws[cellRange]:
-            for cell in row:
-                cell.alignment = al
+            
+    def formatRows(ws, cellRange, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
+        # CellRange is a tuple (start, end)
+        # Formats each row in a range with the same formatting
+        if not isinstance(cellRange, tuple):
+            ws.row_dimensions[cellRange].font = ft
+            ws.row_dimensions[cellRange].fill = fl
+            ws.row_dimensions[cellRange].border = bd
+            ws.row_dimensions[cellRange].alignment = al
+        else:
+            for row in range(cellRange[0], cellRange[1]+1):
+                ws.row_dimensions[row].font = ft
+                ws.row_dimensions[row].fill = fl
+                ws.row_dimensions[row].border = bd
+                ws.row_dimensions[row].alignment = al
+            
+    def formatColumns(ws, cellRange, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
+        # CellRange is a tuple (start, end)
+        # Formats each column in a range with the same formatting
+        if len(cellRange) == 1:
+            ws.column_dimensions[cellRange[0]].font = ft
+            ws.column_dimensions[cellRange[0]].fill = fl
+            ws.column_dimensions[cellRange[0]].border = bd
+            ws.column_dimensions[cellRange[0]].alignment = al
+        else:
+            for column in openpyxl.utils.get_column_interval(cellRange[0], cellRange[1]):
+                ws.column_dimensions[column].font = ft
+                ws.column_dimensions[column].fill = fl
+                ws.column_dimensions[column].border = bd
+                ws.column_dimensions[column].alignment = al
                 
     def setColumnWidth(ws, col, width):
-        for column in openpyxl.utils.get_column_interval(col[0], col[1]):
-            ws.column_dimensions[column].width = width
+        if not isinstance(col, tuple):
+            if isinstance(col, int):
+                col = openpyxl.utils.get_column_letter(col)
+            ws.column_dimensions[col].width = width
+        else:
+            for column in openpyxl.utils.get_column_interval(col[0], col[1]):
+                ws.column_dimensions[column].width = width
             
     def fitColumnWidth(ws, cellRange):
         dim = {}
@@ -46,7 +62,14 @@ class ExcelFormatter:
         for row in ws[cellRange]:
             for cell in row:
                 cell.number_format = format
-            
+    
+    def formatTextNumber(ws, cellRange, format):
+        for row in ws[cellRange]:
+            for cell in row:
+                if isinstance(cell.value, str) and cell.value.isnumeric():
+                    cell.value = int(cell.value)
+                cell.number_format = format
+
     '''
 # These are the constructors for the formatting objects
 Font(name='Calibri', size=11, bold=False, italic=False, vertAlign=None, underline='none', strike=False, color='FF000000')
