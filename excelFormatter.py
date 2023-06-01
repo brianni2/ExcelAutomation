@@ -11,35 +11,33 @@ class ExcelFormatter:
                 cell.border = bd
                 cell.alignment = al
             
-    def formatRows(ws, cellRange, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
-        # CellRange is a tuple (start, end)
-        # Formats each row in a range with the same formatting
+    def formatAxis(ws, cellRange, axis=0, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
+        # CellRange is a tuple (start, end); end is exclusive
+        # Formats each row (default) or column in a range with the same formatting
         if not isinstance(cellRange, tuple):
-            ws.row_dimensions[cellRange].font = ft
-            ws.row_dimensions[cellRange].fill = fl
-            ws.row_dimensions[cellRange].border = bd
-            ws.row_dimensions[cellRange].alignment = al
+            if axis == 0:
+                ws.row_dimensions[cellRange].font = ft
+                ws.row_dimensions[cellRange].fill = fl
+                ws.row_dimensions[cellRange].border = bd
+                ws.row_dimensions[cellRange].alignment = al
+            else:
+                ws.column_dimensions[cellRange[0]].font = ft
+                ws.column_dimensions[cellRange[0]].fill = fl
+                ws.column_dimensions[cellRange[0]].border = bd
+                ws.column_dimensions[cellRange[0]].alignment = al
         else:
-            for row in range(cellRange[0], cellRange[1]+1):
-                ws.row_dimensions[row].font = ft
-                ws.row_dimensions[row].fill = fl
-                ws.row_dimensions[row].border = bd
-                ws.row_dimensions[row].alignment = al
-            
-    def formatColumns(ws, cellRange, ft=Font(), fl=PatternFill(), bd=Border(), al=Alignment()):
-        # CellRange is a tuple (start, end)
-        # Formats each column in a range with the same formatting
-        if len(cellRange) == 1:
-            ws.column_dimensions[cellRange[0]].font = ft
-            ws.column_dimensions[cellRange[0]].fill = fl
-            ws.column_dimensions[cellRange[0]].border = bd
-            ws.column_dimensions[cellRange[0]].alignment = al
-        else:
-            for column in openpyxl.utils.get_column_interval(cellRange[0], cellRange[1]):
-                ws.column_dimensions[column].font = ft
-                ws.column_dimensions[column].fill = fl
-                ws.column_dimensions[column].border = bd
-                ws.column_dimensions[column].alignment = al
+            if axis == 0:
+                for row in range(cellRange[0], cellRange[1]):
+                    ws.row_dimensions[row].font = ft
+                    ws.row_dimensions[row].fill = fl
+                    ws.row_dimensions[row].border = bd
+                    ws.row_dimensions[row].alignment = al
+            else:
+                for column in openpyxl.utils.get_column_interval(cellRange[0], cellRange[1]):
+                    ws.column_dimensions[column].font = ft
+                    ws.column_dimensions[column].fill = fl
+                    ws.column_dimensions[column].border = bd
+                    ws.column_dimensions[column].alignment = al
                 
     def setColumnWidth(ws, col, width):
         if not isinstance(col, tuple):
