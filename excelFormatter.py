@@ -21,10 +21,12 @@ class ExcelFormatter:
                 ws.row_dimensions[cellRange].border = bd
                 ws.row_dimensions[cellRange].alignment = al
             else:
-                ws.column_dimensions[cellRange[0]].font = ft
-                ws.column_dimensions[cellRange[0]].fill = fl
-                ws.column_dimensions[cellRange[0]].border = bd
-                ws.column_dimensions[cellRange[0]].alignment = al
+                if isinstance(cellRange, int):
+                    cellRange = openpyxl.utils.get_column_letter(cellRange)
+                ws.column_dimensions[cellRange].font = ft
+                ws.column_dimensions[cellRange].fill = fl
+                ws.column_dimensions[cellRange].border = bd
+                ws.column_dimensions[cellRange].alignment = al
         else:
             if axis == 0:
                 for row in range(cellRange[0], cellRange[1]):
@@ -45,8 +47,12 @@ class ExcelFormatter:
                 col = openpyxl.utils.get_column_letter(col)
             ws.column_dimensions[col].width = width
         else:
-            for column in openpyxl.utils.get_column_interval(col[0], col[1]):
-                ws.column_dimensions[column].width = width
+            if isinstance(width, int):
+                for column in openpyxl.utils.get_column_interval(col[0], col[1]):
+                    ws.column_dimensions[column].width = width
+            else:
+                for column, w in zip(openpyxl.utils.get_column_interval(col[0], col[1]), width):
+                    ws.column_dimensions[column].width = w
             
     def fitColumnWidth(ws, cellRange):
         dim = {}
